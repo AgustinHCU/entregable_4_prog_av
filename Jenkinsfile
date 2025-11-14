@@ -1,6 +1,11 @@
 pipeline {
     agent any
-    
+
+    tools {
+        maven 'Maven3'   // Nombre configurado en Global Tool Configuration
+        jdk 'JDK17'      // O el nombre de tu instalación de Java
+    }
+
     stages {
 
         stage('Checkout') {
@@ -10,36 +15,27 @@ pipeline {
                     url: 'https://github.com/AgustinHCU/entregable_4_prog_av.git'
             }
         }
-        
+
         stage('Build') {
             steps {
-                echo "Building.."
-                sh '''
-                echo "Compiling Java classes.."
-                mkdir -p target/classes
-                javac -d target/classes src/main/java/streaming/*.java
-                '''
+                echo "Building project with Maven..."
+                sh "mvn -B -e -DskipTests clean package"
             }
         }
-        
+
         stage('Test') {
             steps {
-                echo "Testing.."
-                sh '''
-                echo "Running manual test (no JUnit available).."
-                # Run main class as test
-                java -cp target/classes streaming.Streaming
-                '''
+                echo "Running tests..."
+                sh "mvn test"
             }
         }
-        
+
         stage('Deliver') {
             steps {
-                echo 'Delivering application..'
+                echo "Packaging and delivering..."
                 sh '''
-                echo "Packaging application.."
-                jar cfe streaming.jar streaming.Streaming -C target/classes .
-                echo "Application packaged successfully!"
+                echo "Resulting JAR files in target/:"
+                ls -lh target
                 '''
             }
         }
