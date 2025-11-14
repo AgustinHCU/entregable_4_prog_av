@@ -1,41 +1,31 @@
 pipeline {
-    agent any
-
-    tools {
-        maven 'Maven3'   // Nombre configurado en Global Tool Configuration
-        jdk 'JDK17'      // O el nombre de tu instalación de Java
-    }
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-                echo "Checking out source code.."
-                git branch: 'main',
-                    url: 'https://github.com/AgustinHCU/entregable_4_prog_av.git'
+    agent { 
+        node {
+            label 'any'
             }
-        }
-
+      }
+    stages {
         stage('Build') {
             steps {
-                echo "Building project with Maven..."
-                sh "mvn -B -e -DskipTests clean package"
+                echo "Building.."
+                sh '''
+                echo "doing build stuff.."
+                '''
             }
         }
-
         stage('Test') {
             steps {
-                echo "Running tests..."
-                sh "mvn test"
+                echo "Testing.."
+                sh '''
+                echo "doing test stuff..
+                '''
             }
         }
-
         stage('Deliver') {
             steps {
-                echo "Packaging and delivering..."
+                echo 'Deliver....'
                 sh '''
-                echo "Resulting JAR files in target/:"
-                ls -lh target
+                echo "doing delivery stuff.."
                 '''
             }
         }
