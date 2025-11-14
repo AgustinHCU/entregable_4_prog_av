@@ -1,16 +1,13 @@
 pipeline {
-    agent { 
-        node {
-            label ''
-        }
-    }
+    agent any
     
     stages {
+
         stage('Checkout') {
             steps {
                 echo "Checking out source code.."
-                git branch: 'main', 
-                    url: 'https://github.com/your-username/mi-playlist.git'
+                git branch: 'main',
+                    url: 'https://github.com/AgustinHCU/entregable_4_prog_av.git'
             }
         }
         
@@ -19,7 +16,8 @@ pipeline {
                 echo "Building.."
                 sh '''
                 echo "Compiling Java classes.."
-                javac -d target/classes src/main/java/com/playlist/**/*.java
+                mkdir -p target/classes
+                javac -d target/classes src/main/java/streaming/*.java
                 '''
             }
         }
@@ -28,9 +26,9 @@ pipeline {
             steps {
                 echo "Testing.."
                 sh '''
-                echo "Running basic tests.."
-                # Simple test execution
-                java -cp target/classes com.playlist.AppTest
+                echo "Running manual test (no JUnit available).."
+                # Run main class as test
+                java -cp target/classes streaming.Streaming
                 '''
             }
         }
@@ -39,8 +37,8 @@ pipeline {
             steps {
                 echo 'Delivering application..'
                 sh '''
-                echo "Creating JAR package.."
-                jar cfe mi-playlist.jar com.playlist.Main -C target/classes .
+                echo "Packaging application.."
+                jar cfe streaming.jar streaming.Streaming -C target/classes .
                 echo "Application packaged successfully!"
                 '''
             }
