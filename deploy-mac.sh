@@ -73,4 +73,4 @@ else
    cat app.log
    echo "==================== END LOGS ===================="
    exit 1
-fiq
+fi
