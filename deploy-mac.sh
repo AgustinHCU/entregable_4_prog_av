@@ -40,9 +40,10 @@ cd $DEPLOY_DIR
 echo "Current directory: $(pwd)"
 echo "Java version: $(java -version 2>&1 | head -1)"
 
-# Start with detailed logging
+# Start with detailed logging - disown to prevent termination when parent exits
 nohup java -jar app.jar > app.log 2>&1 &
 APP_PID=$!
+disown
 
 echo "Application started with PID: $APP_PID"
 echo ""
@@ -72,4 +73,4 @@ else
    cat app.log
    echo "==================== END LOGS ===================="
    exit 1
-fi
+fiq
