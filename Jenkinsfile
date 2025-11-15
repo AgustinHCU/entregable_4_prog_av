@@ -4,6 +4,9 @@ pipeline {
             label 'macos'
         }
     }
+    tools {
+        maven 'Maven'  // This name must match what you named it in Jenkins
+    }
     stages {
         stage('Build') {
             steps {
