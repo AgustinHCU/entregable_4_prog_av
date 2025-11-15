@@ -31,7 +31,7 @@ pipeline {
                 echo 'Deploying application...'
                 sh '''
                 if [[ "$OSTYPE" == "darwin"* ]]; then
-                    ./deploy-mac.sh
+                    JENKINS_NODE_COOKIE=dontKillMe ./deploy-mac.sh
                 fi
                 '''
             }
