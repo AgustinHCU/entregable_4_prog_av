@@ -1,8 +1,9 @@
 #!/bin/bash
 
 echo "Stopping existing application..."
-pkill -f "playlist.*jar" || true
-sleep 2
+pkill -f "music-playlist.*jar" || true
+pkill -f "app.jar" || true
+sleep 3
 
 echo "Copying JAR to deployment directory..."
 DEPLOY_DIR="$HOME/playlist-deploy"
