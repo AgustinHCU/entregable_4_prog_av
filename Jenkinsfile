@@ -2,30 +2,34 @@ pipeline {
     agent { 
         node {
             label 'macos'
-            }
-      }
+        }
+    }
     stages {
         stage('Build') {
             steps {
-                echo "Building.."
-                sh '''
-                echo "doing build stuff.."
-                '''
+                echo "Building with Maven..."
+                sh 'mvn clean compile'
             }
         }
         stage('Test') {
             steps {
-                echo "Testing.."
-                sh '''
-                echo "doing test stuff.."
-                '''
+                echo "Running tests..."
+                sh 'mvn test'
             }
         }
-        stage('Deliver') {
+        stage('Package') {
             steps {
-                echo 'Deliver....'
+                echo "Packaging application..."
+                sh 'mvn package -DskipTests'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
                 sh '''
-                echo "doing delivery stuff.."
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    ./deploy-mac.sh
+                fi
                 '''
             }
         }
