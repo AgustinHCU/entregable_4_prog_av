@@ -1,54 +1,63 @@
 pipeline {
     agent any
     options { timestamps() }
+
+    environment {
+        MAVEN_HOME = tool 'Maven-3.9.11'
+        MVN = "${MAVEN_HOME}/bin/mvn"
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+
         stage('Build') {
             steps {
                 echo "Building with Maven..."
                 script {
                     if (isUnix()) {
-                        sh 'mvn -B -DskipTests=false clean compile'
+                        sh "\"${MVN}\" -B -DskipTests=false clean compile"
                     } else {
-                        bat 'mvn -B -DskipTests=false clean compile'
+                        bat "\"%MVN%\" -B -DskipTests=false clean compile"
                     }
                 }
             }
         }
+
         stage('Test') {
             steps {
                 echo "Running tests..."
                 script {
                     if (isUnix()) {
-                        sh 'mvn -B test'
+                        sh "\"${MVN}\" -B test"
                     } else {
-                        bat 'mvn -B test'
+                        bat "\"%MVN%\" -B test"
                     }
                 }
             }
         }
+
         stage('Package') {
             steps {
                 echo "Packaging application..."
                 script {
                     if (isUnix()) {
-                        sh 'mvn -B package -DskipTests'
+                        sh "\"${MVN}\" -B package -DskipTests"
                     } else {
-                        bat 'mvn -B package -DskipTests'
+                        bat "\"%MVN%\" -B package -DskipTests"
                     }
                 }
             }
         }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
                 script {
                     if (isUnix()) {
-                        // prefer deploy-mac.sh for Unix-like nodes
                         sh 'chmod +x ./deploy-mac.sh || true'
                         sh './deploy-mac.sh'
                     } else {
@@ -58,6 +67,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             echo 'Pipeline finished.'
@@ -67,3 +77,4 @@ pipeline {
         }
     }
 }
+
