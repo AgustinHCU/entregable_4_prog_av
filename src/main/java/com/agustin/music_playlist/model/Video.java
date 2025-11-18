@@ -1,5 +1,7 @@
 package com.agustin.music_playlist.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Video {
     private Long id;
     private String title;
@@ -58,6 +60,7 @@ public class Video {
         this.id = id;
     }
 
+    @JsonIgnore
     public String getEmbedUrl() {
         String videoId = "";
         if (this.url.contains("youtube.com/watch?v=")) {

@@ -1,0 +1,127 @@
+Demo — Presentación en clase: Music Playlist (Entregable 4)
+
+Objetivo
+Mostrar en 8-10 minutos las funcionalidades implementadas, el refactor realizado, la persistencia, los tests y la integración/ despliegue automatizado (Jenkins + scripts).
+
+Requisitos previos (a comprobar antes de la demo)
+- Tener JDK 21 instalado y en PATH.
+- Tener Maven instalado (o pedir ejecutar el wrapper si lo añadimos).
+- Clonar el repo y situarse en la raíz donde está `pom.xml`.
+- Tener permisos para ejecutar scripts (en Unix: chmod +x deploy-mac.sh).
+
+Archivos clave a presentar
+- Código backend: `src/main/java/com/agustin/music_playlist` (controller, service, model)
+- Plantilla UI: `src/main/resources/templates/playlist.html`
+- Persistencia: `PlaylistService` guarda en `playlist_data.json`
+- Tests: `src/test/java/com/agustin/music_playlist/PlaylistServiceTest.java`
+- CI/CD: `Jenkinsfile`
+- Scripts de deploy: `deploy-mac.sh`, `deploy-windows.bat`
+- Demo instructions: `DEMO_INSTRUCCIONES.txt`
+
+1) Inicio rápido (1 min) — contexto y arquitectura
+- Explicar en 30s los requerimientos del entregable (funcionalidades y CI/CD).
+- Mostrar estructura del proyecto (mencionar `pom.xml`, `Jenkinsfile`, `deploy-*.sh/.bat`, `src/`).
+
+2) Ejecutar tests (1-2 min)
+- Comando (PowerShell):
+  mvn -v
+  mvn test
+- Qué mostrar: salida de Maven con tests verdes. Si no tenés Maven instalado, indicar que el test fue añadido y mostrar los archivos de test.
+
+3) Ejecutar la aplicación localmente (2 min)
+- Compilar/paquetear:
+  mvn package
+- Ejecutar JAR:
+  cd target
+  java -jar music-playlist-0.0.1-SNAPSHOT.jar
+- Abrir en el navegador: http://localhost:8081
+- Qué mostrar: la UI con el formulario "Add New Video".
+
+4) Demo funcional (3-4 min)
+- Agregar un video (ejemplo: "Song Demo", https://youtu.be/dQw4w9WgXcQ) usando el formulario.
+- Ver que aparece embebido en la página.
+- Pulsar "Like" varias veces; mostrar contador incrementando.
+- Pulsar "Favorite" y mostrar el icono/estado.
+- Borrar un video con el botón "Delete".
+- Explicar que los cambios se guardan en `playlist_data.json` y que si reinicias la app los videos persisten.
+  - Mostrar contenido de `playlist_data.json` (ej: cat playlist_data.json)
+
+5) Explicar el refactor / code smell trabajado (1-2 min)
+- Mostrar antes/después: `PlaylistController` tenía `model.addAttribute("video", videos)` y usaba `@RequestParam` para ids; la plantilla esperaba `videos` y rutas con `{id}`.
+- Mostrar el cambio aplicado: ahora `showPlaylist` usa "videos" y los endpoints usan `@PathVariable` y el endpoint de favorito fue normalizado a `/favorite/{id}`.
+- Breve explicación del porqué: consistencia entre controlador y vista y principios de claridad.
+
+6) CI/CD con Jenkins (2-3 min)
+- Mostrar `Jenkinsfile` y explicar las etapas: Checkout, Build, Test, Package, Deploy.
+- En la demo en clase (si Jenkins está disponible localmente): ejecutar el job y mostrar la consola del pipeline y que llegue a la etapa Deploy.
+- Explicar que el `Jenkinsfile` es multiplataforma: usa `isUnix()` para decidir `sh` o `bat`.
+
+7) Deploy (opcional en clase si hay ambiente)
+- En el nodo Unix/Mac: el pipeline ejecuta `deploy-mac.sh` (usa `DEPLOY_DIR` y `DEPLOY_PORT`).
+- En Windows: ejecuta `deploy-windows.bat`.
+- Mostrar carpeta de despliegue (`app.jar`, `app.pid`, `app.log`) y la app corriendo en el puerto configurado.
+
+8) Checklist final antes de terminar (30s)
+- Indicar dónde está el informe PDF (si está listo).
+- Confirmar que el ZIP de entrega incluye:
+  - Código fuente completo
+  - `pom.xml` y `Jenkinsfile`
+  - `deploy-mac.sh` y `deploy-windows.bat`
+  - tests
+  - informe PDF
+- Recordar el nombre del ZIP: Entregable2Apellido1Apellido2.zip
+
+Tips y troubleshooting (rápido)
+- Si `mvn` no existe, instalar Maven o pedir que añada el Maven Wrapper.
+- Si la app no arranca por puerto ocupado: revisar `app.pid` o cambiar `DEPLOY_PORT`.
+- Si los botones de la UI no responden: verificar logs en consola del servidor (Spring Boot logs) y la consola del navegador para errores JS.
+
+Tiempo total sugerido para la demo: 8-12 minutos.
+
+Notas finales
+- Si querés, puedo generar además un borrador del informe en Markdown con las secciones requeridas (decisiones técnicas, estructura, pipelines, refactor y code smell, aprendizajes, conclusión). También puedo crear el ZIP final y, si querés, añadir el Maven Wrapper al repo.
+
+FIN
+
+----
+
+9) Nuevo code smell intencional (preparado para la demo)
+- Archivo: `src/main/java/com/agustin/music_playlist/controller/PlaylistController.java`
+- Descripción del smell: "Long Method / Mixed Responsibilities / Duplicated Logic"
+  - Se agregó intencionalmente el método `processAction(String action, Long id, Model model)`.
+  - Este método mezcla validación, modificación del modelo y llamadas al servicio, y contiene bloques de código duplicado para las acciones `like` y `favorite`.
+  - Por qué es un problema: viola el Principio de Responsabilidad Única, dificulta pruebas unitarias y mantenimiento, y contiene duplicación que puede generar errores al modificar el comportamiento en un solo lugar.
+
+Cómo se arregla (refactor propuesto)
+- Objetivo del refactor: separar responsabilidades y eliminar duplicación.
+- Pasos manuales (local):
+  1. Extraer validación a métodos privados: `validateAction(String)` y `validateId(Long)`.
+  2. Extraer las acciones sobre el servicio a métodos separados: `handleLike(Long id)` y `handleFavorite(Long id)` que solo llamen a `playlistService`.
+  3. Hacer que `processAction` delegue a esos métodos y sólo prepare la respuesta (modelo), o eliminar `processAction` y exponer endpoints REST más simples que llamen a los métodos nuevos.
+
+Cómo arreglarlo desde Jenkins (flujo para la demo)
+- Idea: mostrar la integración continua que detecta el cambio en el repo y despliega automáticamente la versión corregida.
+- Flujo de ejemplo que harás en la demo (comandos locales / remoto):
+  1. Crear rama para el refactor:
+    - `git checkout -b fix/refactor-process-action`
+  2. Modificar `PlaylistController.java` según el refactor (extraer métodos y eliminar duplicación).
+  3. Ejecutar tests localmente y confirmar que pasan:
+    - `mvn test`
+  4. Commits y push a remoto:
+    - `git add src/main/java/com/agustin/music_playlist/controller/PlaylistController.java`
+    - `git commit -m "Refactor: extract handlers for like/favorite, remove duplication"`
+    - `git push origin fix/refactor-process-action`
+  5. En Jenkins: si el pipeline está configurado para detectar cambios (multibranch o webhook), el push iniciará automáticamente el pipeline:
+    - Jenkins ejecuta Checkout -> Build -> Test -> Package -> Deploy.
+    - Mostrar la consola del job: verificar que los tests corren y pasan.
+  6. Si los tests pasan, Jenkins llega a la etapa Deploy y ejecuta `deploy-*.sh/.bat`, mostrando la app ya desplegada con la corrección aplicada.
+
+Qué mostrar en la demo (en 2-3 min)
+- Antes: navegar al código y señalar `processAction` mostrando las líneas duplicadas y mezcla de responsabilidades.
+- Arreglar: hacer el cambio pequeño en el IDE (o mostrar el diff ya preparado), commit y push.
+- Jenkins: mostrar el pipeline ejecutándose automáticamente y llegar a Deploy con tests verdes.
+- Verificación: abrir la app y mostrar que la funcionalidad de like/favorite continúa funcionando, ahora con código más limpio y probado.
+
+Notas finales sobre el refactor en la entrega
+- En el informe PDF incluyan el diff del refactor (antes/después) y una breve explicación de la técnica usada (Extract Method y eliminar duplicación).
+
