@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import com.agustin.music_playlist.model.Video;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -19,7 +20,6 @@ public class PlaylistController {
     @GetMapping("/")
     public String showPlaylist(Model model) {
         List<Video> videos = playlistService.getAllVideos();
-        // La plantilla espera el atributo "videos"
         model.addAttribute("videos", videos);
         return "playlist";
     }
@@ -41,11 +41,29 @@ public class PlaylistController {
         return "redirect:/";
     }
 
-    // La plantilla usa /favorite/{id}
     @PostMapping("/favorite/{id}")
     public String favoriteVideo(@PathVariable Long id) {
         playlistService.toggleFavorite(id);
         return "redirect:/";
+    }
+
+    @GetMapping("/favorites")
+    public String showFavoriteNames(Model model) {
+        List<String> names = playlistService.getFavoriteVideos()
+                .stream()
+                .map(Video::getTitle)
+                .collect(Collectors.toList());
+        model.addAttribute("favoriteNames", names);
+        model.addAttribute("videos", playlistService.getAllVideos());
+        return "playlist";
+    }
+
+    @GetMapping("/most-liked")
+    public String showMostLiked(Model model) {
+        Video most = playlistService.getMostLikedVideo();
+        model.addAttribute("mostLiked", most);
+        model.addAttribute("videos", playlistService.getAllVideos());
+        return "playlist";
     }
 
     // ----- CODE SMELL INTENCIONAL (para la demo) -----

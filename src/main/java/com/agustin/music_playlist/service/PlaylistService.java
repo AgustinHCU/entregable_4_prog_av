@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaylistService {
@@ -80,22 +82,29 @@ public class PlaylistService {
                 });
     }
 
-    // ------------------------------------------------------------
-    // Persistence
-    // ------------------------------------------------------------
+
+    public synchronized List<Video> getFavoriteVideos() {
+        return videos.stream()
+                .filter(Video::isFavorite)
+                .collect(Collectors.toList());
+    }
+
+    public synchronized Video getMostLikedVideo() {
+        return videos.stream()
+                .max(Comparator.comparingInt(Video::getLikes))
+                .orElse(null);
+    }
 
     private void loadFromFile() {
         try {
             File file = storagePath.toFile();
 
             if (!file.exists()) {
-                // No data file yet
                 videos = new ArrayList<>();
                 nextId = 1L;
                 return;
             }
 
-            // If empty file → treat as empty list
             if (Files.size(storagePath) == 0L) {
                 videos = new ArrayList<>();
                 nextId = 1L;
@@ -108,7 +117,6 @@ public class PlaylistService {
 
             videos = new ArrayList<>(list);
 
-            // Recalculate next ID
             nextId = videos.stream()
                     .mapToLong(v -> v.getId() == null ? 0L : v.getId())
                     .max()
@@ -128,7 +136,6 @@ public class PlaylistService {
                 parent.mkdirs();
             }
 
-            // Jackson creates the file itself – don't create it manually
             objectMapper.writerWithDefaultPrettyPrinter()
                     .writeValue(storagePath.toFile(), videos);
 

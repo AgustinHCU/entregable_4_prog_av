@@ -25,7 +25,6 @@ public class PlaylistServiceTest {
         List<Video> videos = service.getAllVideos();
         assertEquals(2, videos.size(), "Debe haber 2 videos luego de agregarlos");
 
-        // Create a new instance reading the same file
         PlaylistService service2 = new PlaylistService(path);
         List<Video> videos2 = service2.getAllVideos();
 
@@ -33,7 +32,6 @@ public class PlaylistServiceTest {
         assertTrue(videos2.stream().anyMatch(v -> v.getTitle().equals("Song A")),
                 "El video 'Song A' debe existir después de recargar la lista");
 
-        // Cleanup
         Files.deleteIfExists(filePath);
         Files.deleteIfExists(tempDir);
     }
@@ -60,7 +58,6 @@ public class PlaylistServiceTest {
         assertTrue(service.getAllVideos().get(0).isFavorite(),
                 "El video debe marcarse como favorito");
 
-        // Cleanup
         Files.deleteIfExists(filePath);
         Files.deleteIfExists(tempDir);
     }
@@ -84,7 +81,6 @@ public class PlaylistServiceTest {
         assertEquals(1, service.getAllVideos().size(),
                 "Después de borrar debe quedar solo 1 video");
 
-        // Cleanup
         Files.deleteIfExists(filePath);
         Files.deleteIfExists(tempDir);
     }
