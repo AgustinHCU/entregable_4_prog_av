@@ -66,47 +66,49 @@ public class PlaylistController {
         return "playlist";
     }
 
-    private String handleLike(Long id, Model model) {
-  if (id == null || id <= 0) {
-    model.addAttribute("error", "Invalid id for like");
-    model.addAttribute("videos", playlistService.getAllVideos());
-    return "playlist";
-  }
-  playlistService.likeVideo(id);
-  model.addAttribute("message", "Liked video " + id);
-  model.addAttribute("videos", playlistService.getAllVideos());
-  return "playlist";
-}
+    // ----- CODE SMELL INTENCIONAL (para la demo) -----
+    // Este método contiene lógica duplicada y mezcla responsabilidades:
+    // valida parámetros, modifica el modelo y realiza acciones sobre el servicio.
+    // Es intencionalmente verboso e innecesariamente complejo para mostrar
+    // un "code smell" que se corregirá durante la demo mediante refactor.
+    public String processAction(String action, Long id, Model model) {
+        // Validación pobre (duplicada en varios lugares)
+        if (action == null || action.isEmpty()) {
+            model.addAttribute("error", "No action provided");
+            return "playlist";
+        }
 
-private String handleFavorite(Long id, Model model) {
-  if (id == null || id <= 0) {
-    model.addAttribute("error", "Invalid id for favorite");
-    model.addAttribute("videos", playlistService.getAllVideos());
-    return "playlist";
-  }
-  playlistService.toggleFavorite(id);
-  model.addAttribute("message", "Toggled favorite " + id);
-  model.addAttribute("videos", playlistService.getAllVideos());
-  return "playlist";
-}
+        // Lógica duplicada: manejo de 'like' y 'favorite' con código similar
+        if (action.equals("like")) {
+            // comprobar id
+            if (id == null || id <= 0) {
+                model.addAttribute("error", "Invalid id for like");
+                return "playlist";
+            }
+            // realizar la acción
+            playlistService.likeVideo(id);
+            // actualizar modelo
+            model.addAttribute("message", "Liked video " + id);
+            List<Video> videos = playlistService.getAllVideos();
+            model.addAttribute("videos", videos);
+            return "playlist";
+        }
 
-public String processAction(String action, Long id, Model model) {
-  if (action == null || action.isEmpty()) {
-    model.addAttribute("error", "No action provided");
-    model.addAttribute("videos", playlistService.getAllVideos());
-    return "playlist";
-  }
+        if (action.equals("favorite")) {
+            if (id == null || id <= 0) {
+                model.addAttribute("error", "Invalid id for favorite");
+                return "playlist";
+            }
+            playlistService.toggleFavorite(id);
+            model.addAttribute("message", "Toggled favorite " + id);
+            List<Video> videos = playlistService.getAllVideos();
+            model.addAttribute("videos", videos);
+            return "playlist";
+        }
 
-  switch (action) {
-    case "like":
-      return handleLike(id, model);
-    case "favorite":
-      return handleFavorite(id, model);
-    default:
-      model.addAttribute("error", "Unknown action");
-      model.addAttribute("videos", playlistService.getAllVideos());
-      return "playlist";
-  }
-}
+        model.addAttribute("error", "Unknown action");
+        return "playlist";
+    }
+
 
 }

@@ -14,14 +14,14 @@ Demo — Presentación en clase: Music Playlist (Entregable 4)
 
 3) code smell
   1. Crear rama para el refactor:
-    - `git checkout -b fix/refactor-process-action`
+    - git checkout -b fix/refactor-process-action
   2. Modificar `PlaylistController.java` según el refactor (extraer métodos y eliminar duplicación).
   3. Ejecutar tests localmente y confirmar que pasan:
     - `mvn test`
   4. Commits y push a remoto:
-    - `git add src/main/java/com/agustin/music_playlist/controller/PlaylistController.java`
-    - `git commit -m "Refactor: extract handlers for like/favorite, remove duplication"`
-    - `git push origin fix/refactor-process-action`
+    - git add src/main/java/com/agustin/music_playlist/controller/PlaylistController.java
+    - git commit -m "Refactor: extract handlers for like/favorite, remove duplication"
+    - git push origin fix/refactor-process-action
   5. En Jenkins: si el pipeline está configurado para detectar cambios, el push iniciará automáticamente el pipeline:
  
 Código listo para copiar/pegar (reemplazo de `processAction`)
