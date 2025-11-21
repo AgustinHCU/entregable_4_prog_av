@@ -5,6 +5,7 @@ pipeline {
     environment {
         MAVEN_HOME = tool 'Maven-3.9.11'
         MVN = "${MAVEN_HOME}/bin/mvn"
+        JENKINS_NODE_COOKIE = 'dontKillMe'
     }
 
     stages {
