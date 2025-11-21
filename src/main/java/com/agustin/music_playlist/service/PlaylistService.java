@@ -24,21 +24,16 @@ public class PlaylistService {
     private List<Video> videos = new ArrayList<>();
     private Long nextId = 1L;
 
-    // Default constructor – production
     public PlaylistService() {
         this.storagePath = Path.of("playlist_data.json");
         loadFromFile();
     }
 
-    // Constructor for tests
     public PlaylistService(String storageFilePath) {
         this.storagePath = Path.of(storageFilePath);
         loadFromFile();
     }
 
-    // ------------------------------------------------------------
-    // Public Methods
-    // ------------------------------------------------------------
 
     public synchronized List<Video> getAllVideos() {
         return Collections.unmodifiableList(videos);
